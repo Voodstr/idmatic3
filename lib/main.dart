@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:idmatic3/widgets/loginScreen.dart';
+import 'widgets/widgets.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,18 +57,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,32 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        actions: [
-          IconButton(onPressed: actoinButton(context), icon: Icon(Icons.add)),
-          IconButton(onPressed: actoinButton(context), icon: Icon(Icons.add)),
-          IconButton(onPressed: actoinButton(context), icon: Icon(Icons.add)),
-          IconButton(onPressed: actoinButton(context), icon: Icon(Icons.add))
-        ],
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: LoginScreen(),
-      ),
-    );
+    return TabBarWidget();
   }
 
-  actoinButton(BuildContext context) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Доступ запрещен")));
-  }
 }
+
+
+
