@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:idmatic3/widgets/widgets.dart';
+import 'package:postgres/postgres.dart';
 
 class Journal extends StatelessWidget {
   const Journal({super.key});
@@ -6,6 +8,6 @@ class Journal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Text("Журнал Событий");
+    return Text("data");
   }
 }
