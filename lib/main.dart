@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'widgets/widgets.dart';
 import 'package:postgres/postgres.dart';
+import 'package:idmatic3/data.dart' as data;
 
 void main() {
   runApp(const IDMatic());
@@ -58,8 +62,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final validLogin = "123";
-  final validPwd = "202cb962ac59075b964b07152d234b70";
   String defaultIP = "localhost";
   late PostgreSQLConnection _connection = PostgreSQLConnection(
       defaultIP, 5432, "mscd",
@@ -69,20 +71,27 @@ class _MainPageState extends State<MainPage> {
   final TextEditingController loginTextController = TextEditingController();
   final TextEditingController pwdTextController = TextEditingController();
   int _selectedDrawerIndex = 0;
-  String dbState = "offline";
+  String _dbState = "Не подключено";
+  int _priveleges = 0;
 
   @override
   Widget build(BuildContext context) {
-    if (dbState == "offline") {
+    if (_dbState == "Не подключено") {
       return Scaffold(
         body: Center(
+          heightFactor: 100.0,
+          widthFactor: 100.0,
           child: TextButton(
             onPressed: () => loginDialog(context),
-            child: Text("ВХОД"),
+            child: const Text(
+              "ВХОД",
+              textScaleFactor: 2.0,
+            ),
           ),
         ),
       );
     } else {
+      //print(data.privilegesToBoolList(_priveleges));
       return DefaultTabController(
         initialIndex: 0,
         length: 7,
@@ -102,9 +111,9 @@ class _MainPageState extends State<MainPage> {
             ),
             title: Row(
               children: [
-                Text("IDMatic 3"),
-                Spacer(),
-                Text("dbstate: $dbState")
+                const Text("IDMatic 3"),
+                const Spacer(),
+                Text("Состояние: $_dbState")
               ],
             ),
             centerTitle: true,
@@ -225,6 +234,8 @@ class _MainPageState extends State<MainPage> {
   }
 
   void loginDialog(BuildContext context) {
+    //TODO вынести в отдельный элемент
+    serverTextController.text = defaultIP; //TODO добавить список ip адресов
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -284,42 +295,48 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  void _onLogin(String text){
+  void _onLogin(String text) {
     setState(() {
-      dbState = text;
+      _dbState = text;
+    });
+  }
+
+  void _onPrivilegesChange(String priv) {
+    setState(() {
+      _priveleges = int.parse(priv.substring(1, priv.length - 1));
     });
   }
 
   Future<int> checkLogin(String login, String pwd, BuildContext context) async {
-    //TODO check server connection
-    List<dynamic> qLogin;
+    List<dynamic> qPrivileges;
     switch (await dbConnect(serverTextController.text)) {
       case 2:
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("db connection - error")));
+            const SnackBar(content: Text("Ошибка подключения к БД")));
         return 0;
       default:
         try {
-          qLogin = await _connection.query(
-              "SELECT name FROM tuser WHERE name = @aValue AND password = @bValue",
-              substitutionValues: {"aValue": login, "bValue": pwd});
+          qPrivileges = await _connection.query(
+              "SELECT privilege FROM tuser WHERE name = @aValue AND password = @bValue",
+              substitutionValues: {"aValue": login, "bValue": data.md5Hash(pwd)});
         } catch (e) {
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("db - ok, login - error")));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Ошибка входа")));
           return 2;
         }
-        if (qLogin.isNotEmpty) {
+        if (qPrivileges.isNotEmpty) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("SUCCESS")));
+              .showSnackBar(const SnackBar(content: Text("Подключено")));
           Navigator.pop(context);
+          _onPrivilegesChange(qPrivileges.first.toString());
           return 1;
         } else {
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("db - ok, login - error")));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Ошибка входа")));
           return 2;
         }
     }
@@ -331,20 +348,19 @@ class _MainPageState extends State<MainPage> {
           username: "postgres", password: "pgsql");
     });
     if (!_connection.isClosed) {
-      print("alredy open db connection");
-      _onLogin("connected to ${serverTextController.text}");
+      _onLogin("Подключен к ${serverTextController.text}");
       return 1; //"already open";
     } else {
       try {
         await _connection.open();
       } catch (e) {
-        _onLogin("unable to connect to ${serverTextController.text} : $e");
-        print("unable to connect: $e");
+        _onLogin("Невозможно подключиться к ${serverTextController.text} : $e"
+            .substring(0, 50));
         return 2; //"unable to connect: $e";
       }
-      print("connected to mscd");
-      _onLogin("connected to ${serverTextController.text}");
+      _onLogin("Подключен к ${serverTextController.text}");
       return 3; //"connected to mscd";
     }
   }
 }
+
