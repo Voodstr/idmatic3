@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'widgets/widgets.dart';
 import 'package:postgres/postgres.dart';
-import 'package:idmatic3/data.dart' as data;
+import 'package:idmatic3/widgets/widgets.dart';
+import 'package:crypto/crypto.dart';
 
 void main() {
   runApp(const IDMatic());
@@ -35,7 +34,7 @@ class IDMatic extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
       home: const MainPage(title: 'IDMatic 3'),
@@ -45,15 +44,6 @@ class IDMatic extends StatelessWidget {
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -67,22 +57,43 @@ class _MainPageState extends State<MainPage> {
       defaultIP, 5432, "mscd",
       username: "postgres", password: "pgsql");
 
-  final TextEditingController serverTextController = TextEditingController();
-  final TextEditingController loginTextController = TextEditingController();
-  final TextEditingController pwdTextController = TextEditingController();
   int _selectedDrawerIndex = 0;
-  String _dbState = "Не подключено";
-  int _priveleges = 0;
+  String _dbState = "Нет соединения";
+
+  List<AdminPrivilege> adminList = [
+    AdminPrivilege("Администратор привилегий операторов", false),
+    AdminPrivilege("Редактирование персональных данных", false),
+    AdminPrivilege("Изменение ключей контроля доступа", false),
+    AdminPrivilege("Изменение графиков работы", false),
+    AdminPrivilege("Изменение считывателей системы", false),
+    AdminPrivilege("Настройка календаря праздников", false),
+    AdminPrivilege("Просмотр журнала событий", false),
+    AdminPrivilege("Создание уровней доступа", false),
+    AdminPrivilege("Список внешних клиентов", false),
+    AdminPrivilege("Учёт рабочего времени", false)
+  ];
+
+  List<NamedTab> tabs = [
+    NamedTab("Журнал событий", Journal(), false),
+    NamedTab("Персональная карточка", Person(), true),
+    NamedTab("Уровни доступа", AccessLevel(), true),
+    NamedTab("Оборудование", Equipment(), false),
+    NamedTab("Календарь праздников", Holidays(), false),
+    NamedTab("Учёт рабочего времени", Accounting(), false),
+    NamedTab("Внешние Клиенты", Clients(), false),
+    NamedTab("Панель Администратора", Privileges(), false)
+  ];
 
   @override
   Widget build(BuildContext context) {
-    if (_dbState == "Не подключено") {
+    if (_dbState == "Нет соединения") {
       return Scaffold(
         body: Center(
           heightFactor: 100.0,
           widthFactor: 100.0,
           child: TextButton(
-            onPressed: () => loginDialog(context),
+            onPressed: () => loginDialog(context,
+                (serv, login, pwd, ctx) => logIn(serv, login, pwd, ctx)),
             child: const Text(
               "ВХОД",
               textScaleFactor: 2.0,
@@ -91,10 +102,9 @@ class _MainPageState extends State<MainPage> {
         ),
       );
     } else {
-      //print(data.privilegesToBoolList(_priveleges));
       return DefaultTabController(
         initialIndex: 0,
-        length: 7,
+        length: tabs.where((element) => element.available).toList().length,
         child: Scaffold(
           appBar: AppBar(
             leading: Builder(
@@ -111,66 +121,17 @@ class _MainPageState extends State<MainPage> {
             ),
             title: Row(
               children: [
-                const Text("IDMatic 3"),
+                Text(widget.title),
                 const Spacer(),
                 Text("Состояние: $_dbState")
               ],
             ),
             centerTitle: true,
-            bottom: const TabBar(
-              indicatorColor: Colors.red,
-              tabs: <Widget>[
-                Tab(
-                  child: Text(
-                    'Журнал событий',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Персональная карточка',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Уровни доступа',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Оборудование',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Календарь праздников',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Учет рабочего времени',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Администратор',
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 0.9,
-                  ),
-                ),
-              ],
-            ),
+            bottom: TabBar(
+                tabs: tabs
+                    .where((element) => element.available)
+                    .map((e) => e.tabTitleWidget())
+                    .toList()),
           ),
           drawer: Drawer(
             // Add a ListView to the drawer. This ensures the user can scroll
@@ -182,20 +143,23 @@ class _MainPageState extends State<MainPage> {
               children: [
                 const DrawerHeader(
                   decoration: BoxDecoration(
-                    color: Colors.blue,
                   ),
-                  child: Text('Drawer Header'),
+                  child: Text('IDMatic 3.0'),
                 ),
                 ListTile(
-                  title: const Text('Login'),
+                  title: const Text('Сменить пользователя'),
                   selected: _selectedDrawerIndex == 0,
                   onTap: () {
                     Navigator.pop(context);
-                    loginDialog(context);
+                    _onItemTapped(0);
+                    loginDialog(
+                        context,
+                        (serv, login, pwd, ctx) =>
+                            logIn(serv, login, pwd, ctx));
                   },
                 ),
                 ListTile(
-                  title: const Text('Business'),
+                  title: const Text('Выход'),
                   selected: _selectedDrawerIndex == 1,
                   onTap: () {
                     // Update the state of the app
@@ -203,89 +167,101 @@ class _MainPageState extends State<MainPage> {
                     // Then close the drawer
                     Navigator.pop(context);
                   },
-                ),
-                ListTile(
-                  title: const Text('School'),
-                  selected: _selectedDrawerIndex == 2,
-                  onTap: () {
-                    // Update the state of the app
-                    _onItemTapped(2);
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
+                )
               ],
             ),
           ),
-          body: const TabBarView(
-            children: <Widget>[
-              Journal(),
-              Person(),
-              AccessLevel(),
-              Equipment(),
-              Holidays(),
-              Accounting(),
-              Privileges(),
-            ],
+          body: TabBarView(
+            children: tabs
+                .where((element) => element.available)
+                .map((e) => e.tabWidget)
+                .toList(),
           ),
         ),
       );
     }
   }
 
-  void loginDialog(BuildContext context) {
-    //TODO вынести в отдельный элемент
-    serverTextController.text = defaultIP; //TODO добавить список ip адресов
+  void loginDialog(
+      BuildContext context,
+      void Function(
+              String server, String login, String pwd, BuildContext context)
+          onComplete) {
+    TextEditingController serverTextController = TextEditingController();
+    TextEditingController loginTextController = TextEditingController();
+    TextEditingController pwdTextController = TextEditingController();
+    serverTextController.text = "localhost"; //TODO добавить список ip адресов
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return Dialog(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Text(
-                  "Вход в систему СКУД",
-                  textScaleFactor: 1.5,
-                )),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: TextField(
-                controller: serverTextController,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                onEditingComplete: () => checkLogin(
-                    loginTextController.text, pwdTextController.text, context),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    "Вход в систему СКУД",
+                    textScaleFactor: 1.5,
+                  )),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: TextField(
+                    controller: serverTextController,
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
+                    onEditingComplete: () => {
+                          onComplete(
+                              serverTextController.text,
+                              loginTextController.text,
+                              pwdTextController.text,
+                              context)
+                        }),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: TextField(
-                controller: loginTextController,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                onEditingComplete: () => checkLogin(
-                    loginTextController.text, pwdTextController.text, context),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: TextField(
+                    controller: loginTextController,
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
+                    onEditingComplete: () => {
+                          onComplete(
+                              serverTextController.text,
+                              loginTextController.text,
+                              pwdTextController.text,
+                              context)
+                        }),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: TextField(
-                controller: pwdTextController,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                onEditingComplete: () => checkLogin(
-                    loginTextController.text, pwdTextController.text, context),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: TextField(
+                    controller: pwdTextController,
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
+                    onEditingComplete: () => {
+                          onComplete(
+                              serverTextController.text,
+                              loginTextController.text,
+                              pwdTextController.text,
+                              context)
+                        }),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(mainAxisSize: MainAxisSize.max, children: [
-                Expanded(
-                    child: TextButton(
-                        onPressed: () => checkLogin(loginTextController.text,
-                            pwdTextController.text, context),
-                        child: const Text("OK"))),
-              ]),
-            ),
-          ]));
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(mainAxisSize: MainAxisSize.max, children: [
+                  Expanded(
+                      child: TextButton(
+                          onPressed: () => {
+                                onComplete(
+                                    serverTextController.text,
+                                    loginTextController.text,
+                                    pwdTextController.text,
+                                    context)
+                              },
+                          child: const Text("OK"))),
+                ]),
+              ),
+            ]),
+          );
         });
   }
 
@@ -295,7 +271,7 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  void _onLogin(String text) {
+  void _dbStateChange(String text) {
     setState(() {
       _dbState = text;
     });
@@ -303,28 +279,30 @@ class _MainPageState extends State<MainPage> {
 
   void _onPrivilegesChange(String priv) {
     setState(() {
-      _priveleges = int.parse(priv.substring(1, priv.length - 1));
+      adminList = getAdminList(int.parse(priv.substring(1, priv.length - 1)));
+      updateTabs(adminList);
+      print(priv);
+      tabs.forEach((element) {print("${element.tabName}:${element.available}");});
     });
   }
 
-  Future<int> checkLogin(String login, String pwd, BuildContext context) async {
+  logIn(String server, String login, String pwd, BuildContext context) async {
     List<dynamic> qPrivileges;
-    switch (await dbConnect(serverTextController.text)) {
+    switch (await dbConnect(server)) {
       case 2:
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Ошибка подключения к БД")));
-        return 0;
       default:
         try {
           qPrivileges = await _connection.query(
-              "SELECT privilege FROM tuser WHERE name = @aValue AND password = @bValue",
-              substitutionValues: {"aValue": login, "bValue": data.md5Hash(pwd)});
+              "SELECT privilege FROM tuser WHERE name = @login AND password = @pwd",
+              substitutionValues: {"login": login, "pwd": md5Hash(pwd)});
         } catch (e) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Ошибка входа")));
-          return 2;
+          return;
         }
         if (qPrivileges.isNotEmpty) {
           ScaffoldMessenger.of(context).clearSnackBars();
@@ -332,12 +310,10 @@ class _MainPageState extends State<MainPage> {
               .showSnackBar(const SnackBar(content: Text("Подключено")));
           Navigator.pop(context);
           _onPrivilegesChange(qPrivileges.first.toString());
-          return 1;
         } else {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Ошибка входа")));
-          return 2;
         }
     }
   }
@@ -348,19 +324,78 @@ class _MainPageState extends State<MainPage> {
           username: "postgres", password: "pgsql");
     });
     if (!_connection.isClosed) {
-      _onLogin("Подключен к ${serverTextController.text}");
+      _dbStateChange("Подключен к $ip");
       return 1; //"already open";
     } else {
       try {
         await _connection.open();
       } catch (e) {
-        _onLogin("Невозможно подключиться к ${serverTextController.text} : $e"
-            .substring(0, 50));
+        _dbStateChange("Невозможно подключиться к $ip : $e".substring(0, 50));
         return 2; //"unable to connect: $e";
       }
-      _onLogin("Подключен к ${serverTextController.text}");
+      _dbStateChange("Подключен к $ip");
       return 3; //"connected to mscd";
     }
   }
+
+  void updateTabs(List<AdminPrivilege> adminList) {
+    for (var tab in tabs) {
+      if (adminList.any((elementOne) => elementOne.accessType == tab.tabName)) {
+        tab.available = adminList.firstWhere((elementTwo) => elementTwo.accessType == tab.tabName).available;
+      }
+    }
+  }
+
+  List<AdminPrivilege> getAdminList(int privilegeInt) {
+    List<AdminPrivilege> adminList = [
+      AdminPrivilege("Панель Администратора", false),
+      AdminPrivilege("Персональная карточка", false),
+      AdminPrivilege("Изменение ключей контроля доступа", false),
+      AdminPrivilege("Изменение графиков работы", false),
+      AdminPrivilege("Оборудование", false),
+      AdminPrivilege("Календарь праздников", false),
+      AdminPrivilege("Журнал событий", false),
+      AdminPrivilege("Уровни доступа", false),
+      AdminPrivilege("Внешние Клиенты", false),
+      AdminPrivilege("Учёт рабочего времени", false)
+    ];
+    List<bool> privilegesToList = [];
+    for (int i = 0; i < (11 - privilegeInt.toRadixString(2).length); i++) {
+      privilegesToList.add(false);
+    }
+    privilegeInt.toRadixString(2).characters.forEach((e) {
+      if (e == "1") {
+        privilegesToList.add(true);
+      } else {
+        privilegesToList.add(false);
+      }
+    });
+    for (var element in adminList.indexed) {
+      adminList[element.$1].available =
+          privilegesToList.reversed.toList()[element.$1];
+    }
+    return adminList;
+  }
+
+  String md5Hash(String str) => md5.convert(utf8.encode(str)).toString();
 }
 
+class NamedTab {
+  NamedTab(this.tabName, this.tabWidget, this.available);
+
+  String tabName;
+  Widget tabWidget;
+
+  bool available = false;
+
+  Widget tabTitleWidget() {
+    return Tab(text: tabName);
+  }
+}
+
+class AdminPrivilege {
+  AdminPrivilege(this.accessType, this.available);
+
+  String accessType = "";
+  bool available = false;
+}
