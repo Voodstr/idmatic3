@@ -73,19 +73,25 @@ class _MainPageState extends State<MainPage> {
     AdminPrivilege("Учёт рабочего времени", false)
   ];
 
-  List<NamedTab> tabs = [
-    NamedTab("Журнал событий", Journal(), false),
-    NamedTab("Персональная карточка", Person(), true),
-    NamedTab("Уровни доступа", AccessLevel(), true),
-    NamedTab("Оборудование", Equipment(), false),
-    NamedTab("Календарь праздников", Holidays(), false),
-    NamedTab("Учёт рабочего времени", Accounting(), false),
-    NamedTab("Внешние Клиенты", Clients(), false),
-    NamedTab("Панель Администратора", Privileges(), false)
-  ];
+
 
   @override
   Widget build(BuildContext context) {
+    List<NamedTab> tabs = [
+      NamedTab("Журнал событий", Journal(connection: getConnection()), false),
+      NamedTab("Персональная карточка", Person(connection: getConnection()), false),
+      NamedTab("Уровни доступа", AccessLevel(connection: getConnection()), false),
+      NamedTab("Оборудование", Equipment(connection: getConnection()), false),
+      NamedTab("Календарь праздников", Holidays(connection: getConnection()), false),
+      NamedTab("Учёт рабочего времени", Accounting(connection: getConnection()), false),
+      NamedTab("Внешние Клиенты", Clients(connection: getConnection()), false),
+      NamedTab("Панель Администратора", Privileges(connection: getConnection()), false)
+    ];
+    for (var tab in tabs) {
+      if (adminList.any((elementOne) => elementOne.accessType == tab.tabName)) {
+        tab.available = adminList.firstWhere((elementTwo) => elementTwo.accessType == tab.tabName).available;
+      }
+    }
     if (_dbState == "Нет соединения") {
       return Scaffold(
         body: Center(
@@ -277,12 +283,13 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  PostgreSQLConnection getConnection(){
+    return _connection;
+  }
+
   void _onPrivilegesChange(String priv) {
     setState(() {
       adminList = getAdminList(int.parse(priv.substring(1, priv.length - 1)));
-      updateTabs(adminList);
-      print(priv);
-      tabs.forEach((element) {print("${element.tabName}:${element.available}");});
     });
   }
 
@@ -335,14 +342,6 @@ class _MainPageState extends State<MainPage> {
       }
       _dbStateChange("Подключен к $ip");
       return 3; //"connected to mscd";
-    }
-  }
-
-  void updateTabs(List<AdminPrivilege> adminList) {
-    for (var tab in tabs) {
-      if (adminList.any((elementOne) => elementOne.accessType == tab.tabName)) {
-        tab.available = adminList.firstWhere((elementTwo) => elementTwo.accessType == tab.tabName).available;
-      }
     }
   }
 
