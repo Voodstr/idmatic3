@@ -98,3 +98,8 @@ app.*.map.json
 /test/widget_test.dart
 /windows/runner/win32_window.cpp
 /windows/runner/win32_window.h
+
+/web
+/windows
+/linux
+/macos
