@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:postgres/postgres.dart';
+import 'package:idmatic3/widgets/widgets.dart';
 
-class Accounting extends StatefulWidget {
-  const Accounting({super.key, required this.connection});
+class Accounting extends PGStatefulWidget {
+  const Accounting({super.key, required super.connection});
 
-  final PostgreSQLConnection connection;
 
   @override
   State<Accounting> createState() => _AccountingState();

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:postgres/postgres.dart';
+import 'package:idmatic3/widgets/widgets.dart';
 
-class Holidays extends StatefulWidget {
-  const Holidays({super.key, required this.connection});
-
-  final PostgreSQLConnection connection;
+class Holidays extends PGStatefulWidget {
+  const Holidays({super.key, required super.connection});
 
   @override
   State<Holidays> createState() => _HolidaysState();

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
@@ -37,21 +38,21 @@ class IDMatic extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MainPage(title: 'IDMatic 3'),
+      home: const IDMaticMainPage(title: 'IDMatic 3'),
     );
   }
 }
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key, required this.title});
+class IDMaticMainPage extends StatefulWidget {
+  const IDMaticMainPage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<IDMaticMainPage> createState() => _IDMaticMainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _IDMaticMainPageState extends State<IDMaticMainPage> {
   String defaultIP = "localhost";
   late PostgreSQLConnection _connection = PostgreSQLConnection(
       defaultIP, 5432, "mscd",
@@ -59,37 +60,46 @@ class _MainPageState extends State<MainPage> {
 
   int _selectedDrawerIndex = 0;
   String _dbState = "Нет соединения";
+  String currentUser = "";
 
   List<AdminPrivilege> adminList = [
-    AdminPrivilege("Администратор привилегий операторов", false),
-    AdminPrivilege("Редактирование персональных данных", false),
+    AdminPrivilege("Панель Администратора", false),
+    AdminPrivilege("Персональная карточка", false),
     AdminPrivilege("Изменение ключей контроля доступа", false),
     AdminPrivilege("Изменение графиков работы", false),
-    AdminPrivilege("Изменение считывателей системы", false),
-    AdminPrivilege("Настройка календаря праздников", false),
-    AdminPrivilege("Просмотр журнала событий", false),
-    AdminPrivilege("Создание уровней доступа", false),
-    AdminPrivilege("Список внешних клиентов", false),
+    AdminPrivilege("Оборудование", false),
+    AdminPrivilege("Календарь праздников", false),
+    AdminPrivilege("Журнал событий", false),
+    AdminPrivilege("Уровни доступа", false),
+    AdminPrivilege("Внешние Клиенты", false),
     AdminPrivilege("Учёт рабочего времени", false)
   ];
-
-
-
   @override
   Widget build(BuildContext context) {
-    List<NamedTab> tabs = [
-      NamedTab("Журнал событий", Journal(connection: getConnection()), false),
-      NamedTab("Персональная карточка", Person(connection: getConnection()), false),
-      NamedTab("Уровни доступа", AccessLevel(connection: getConnection()), false),
-      NamedTab("Оборудование", Equipment(connection: getConnection()), false),
-      NamedTab("Календарь праздников", Holidays(connection: getConnection()), false),
-      NamedTab("Учёт рабочего времени", Accounting(connection: getConnection()), false),
-      NamedTab("Внешние Клиенты", Clients(connection: getConnection()), false),
-      NamedTab("Панель Администратора", Privileges(connection: getConnection()), false)
+    List<AvailableWidget> mainWidgets = [
+      AvailableWidget(
+          "Журнал событий", Journal(connection: _connection), false),
+      AvailableWidget(
+          "Персональная карточка", Person(connection: _connection), false),
+      AvailableWidget(
+          "Уровни доступа", AccessLevel(connection: _connection), false),
+      AvailableWidget(
+          "Оборудование", Equipment(connection: _connection), false),
+      AvailableWidget(
+          "Календарь праздников", Holidays(connection: _connection), false),
+      AvailableWidget(
+          "Учёт рабочего времени", Accounting(connection: _connection), false),
+      AvailableWidget(
+          "Внешние Клиенты", Clients(connection: _connection), false),
+      AvailableWidget(
+          "Панель Администратора", Privileges(connection: _connection), false)
     ];
-    for (var tab in tabs) {
-      if (adminList.any((elementOne) => elementOne.accessType == tab.tabName)) {
-        tab.available = adminList.firstWhere((elementTwo) => elementTwo.accessType == tab.tabName).available;
+    for (var tab in mainWidgets) {
+      if (adminList
+          .any((elementOne) => elementOne.accessType == tab.widgetName)) {
+        tab.available = adminList
+            .firstWhere((elementTwo) => elementTwo.accessType == tab.widgetName)
+            .available;
       }
     }
     if (_dbState == "Нет соединения") {
@@ -108,10 +118,7 @@ class _MainPageState extends State<MainPage> {
         ),
       );
     } else {
-      return DefaultTabController(
-        initialIndex: 0,
-        length: tabs.where((element) => element.available).toList().length,
-        child: Scaffold(
+      return Scaffold(
           appBar: AppBar(
             leading: Builder(
               builder: (BuildContext context) {
@@ -125,66 +132,58 @@ class _MainPageState extends State<MainPage> {
                 );
               },
             ),
-            title: Row(
-              children: [
-                Text(widget.title),
-                const Spacer(),
-                Text("Состояние: $_dbState")
-              ],
-            ),
+            title: StatusTittle(dbState: _dbState, currentUser: currentUser),
             centerTitle: true,
-            bottom: TabBar(
-                tabs: tabs
-                    .where((element) => element.available)
-                    .map((e) => e.tabTitleWidget())
-                    .toList()),
+          ),
+          body: Center(
+            child: mainWidgets[_selectedDrawerIndex].widget,
           ),
           drawer: Drawer(
             // Add a ListView to the drawer. This ensures the user can scroll
             // through the options in the drawer if there isn't enough vertical
             // space to fit everything.
             child: ListView(
-              // Important: Remove any padding from the ListView.
-              padding: EdgeInsets.zero,
-              children: [
-                const DrawerHeader(
-                  decoration: BoxDecoration(
+                // Important: Remove any padding from the ListView.
+                padding: EdgeInsets.zero,
+                children: [
+                  const DrawerHeader(
+                    decoration: BoxDecoration(),
+                    child: Text('IDMatic 3.0'),
+                  ) as Widget
+                ]
+                    .followedBy(mainWidgets
+                        .where((element) => element.available)
+                        .map((e) => (ListTile(
+                              title: Text(e.widgetName),
+                              selected: _selectedDrawerIndex ==
+                                  mainWidgets.indexOf(e),
+                              onTap: () {
+                                Navigator.pop(context);
+                                _onItemTapped(mainWidgets.indexOf(e));
+                              },
+                            ))))
+                    .followedBy([
+                  ListTile(
+                    title: const Text('Сменить пользователя'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      loginDialog(
+                          context,
+                          (serv, login, pwd, ctx) =>
+                              logIn(serv, login, pwd, ctx));
+                    },
                   ),
-                  child: Text('IDMatic 3.0'),
-                ),
-                ListTile(
-                  title: const Text('Сменить пользователя'),
-                  selected: _selectedDrawerIndex == 0,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _onItemTapped(0);
-                    loginDialog(
-                        context,
-                        (serv, login, pwd, ctx) =>
-                            logIn(serv, login, pwd, ctx));
-                  },
-                ),
-                ListTile(
-                  title: const Text('Выход'),
-                  selected: _selectedDrawerIndex == 1,
-                  onTap: () {
-                    // Update the state of the app
-                    _onItemTapped(1);
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            ),
-          ),
-          body: TabBarView(
-            children: tabs
-                .where((element) => element.available)
-                .map((e) => e.tabWidget)
-                .toList(),
-          ),
-        ),
-      );
+                  ListTile(
+                    title: const Text('Выход'),
+                    onTap: () {
+                      // Update the state of the app
+                      // Then close the drawer
+                      Navigator.pop(context);
+                      exit(0);
+                    },
+                  )
+                ]).toList()),
+          ));
     }
   }
 
@@ -193,81 +192,14 @@ class _MainPageState extends State<MainPage> {
       void Function(
               String server, String login, String pwd, BuildContext context)
           onComplete) {
-    TextEditingController serverTextController = TextEditingController();
-    TextEditingController loginTextController = TextEditingController();
-    TextEditingController pwdTextController = TextEditingController();
-    serverTextController.text = "localhost"; //TODO добавить список ip адресов
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return Dialog(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    "Вход в систему СКУД",
-                    textScaleFactor: 1.5,
-                  )),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: TextField(
-                    controller: serverTextController,
-                    decoration:
-                        const InputDecoration(border: OutlineInputBorder()),
-                    onEditingComplete: () => {
-                          onComplete(
-                              serverTextController.text,
-                              loginTextController.text,
-                              pwdTextController.text,
-                              context)
-                        }),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: TextField(
-                    controller: loginTextController,
-                    decoration:
-                        const InputDecoration(border: OutlineInputBorder()),
-                    onEditingComplete: () => {
-                          onComplete(
-                              serverTextController.text,
-                              loginTextController.text,
-                              pwdTextController.text,
-                              context)
-                        }),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: TextField(
-                    controller: pwdTextController,
-                    decoration:
-                        const InputDecoration(border: OutlineInputBorder()),
-                    onEditingComplete: () => {
-                          onComplete(
-                              serverTextController.text,
-                              loginTextController.text,
-                              pwdTextController.text,
-                              context)
-                        }),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(mainAxisSize: MainAxisSize.max, children: [
-                  Expanded(
-                      child: TextButton(
-                          onPressed: () => {
-                                onComplete(
-                                    serverTextController.text,
-                                    loginTextController.text,
-                                    pwdTextController.text,
-                                    context)
-                              },
-                          child: const Text("OK"))),
-                ]),
-              ),
-            ]),
-          );
+          return LoginDialog(
+            onComplete: onComplete,
+            listOfServers: const ["localhost", "130.1.2.102"],
+          ); //TODO получение списка серверов
         });
   }
 
@@ -283,13 +215,10 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  PostgreSQLConnection getConnection(){
-    return _connection;
-  }
-
-  void _onPrivilegesChange(String priv) {
+  void _onSuccessfulLogin(String priv, String login) {
     setState(() {
       adminList = getAdminList(int.parse(priv.substring(1, priv.length - 1)));
+      currentUser = login;
     });
   }
 
@@ -316,7 +245,7 @@ class _MainPageState extends State<MainPage> {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Подключено")));
           Navigator.pop(context);
-          _onPrivilegesChange(qPrivileges.first.toString());
+          _onSuccessfulLogin(qPrivileges.first.toString(), login);
         } else {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context)
@@ -379,16 +308,16 @@ class _MainPageState extends State<MainPage> {
   String md5Hash(String str) => md5.convert(utf8.encode(str)).toString();
 }
 
-class NamedTab {
-  NamedTab(this.tabName, this.tabWidget, this.available);
+class AvailableWidget {
+  AvailableWidget(this.widgetName, this.widget, this.available);
 
-  String tabName;
-  Widget tabWidget;
+  String widgetName;
+  PGStatefulWidget widget;
 
   bool available = false;
 
   Widget tabTitleWidget() {
-    return Tab(text: tabName);
+    return Tab(text: widgetName);
   }
 }
 
