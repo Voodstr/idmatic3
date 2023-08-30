@@ -78,21 +78,21 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
   Widget build(BuildContext context) {
     List<AvailableWidget> mainWidgets = [
       AvailableWidget(
-          "Журнал событий", Journal(connection: _connection), false),
+          "Журнал событий", JournalWidget(connection: _connection), false),
       AvailableWidget(
-          "Персональная карточка", Person(connection: _connection), false),
+          "Персональная карточка", PersonWidget(connection: _connection), false),
       AvailableWidget(
-          "Уровни доступа", AccessLevel(connection: _connection), false),
+          "Уровни доступа", AccessLevelWidget(connection: _connection), false),
       AvailableWidget(
-          "Оборудование", Equipment(connection: _connection), false),
+          "Оборудование", EquipmentWidget(connection: _connection), false),
       AvailableWidget(
-          "Календарь праздников", Holidays(connection: _connection), false),
+          "Календарь праздников", HolidaysWidget(connection: _connection), false),
       AvailableWidget(
-          "Учёт рабочего времени", Accounting(connection: _connection), false),
+          "Учёт рабочего времени", AccountingWidget(connection: _connection), false),
       AvailableWidget(
-          "Внешние Клиенты", Clients(connection: _connection), false),
+          "Внешние Клиенты", ClientsWidget(connection: _connection), false),
       AvailableWidget(
-          "Панель Администратора", Privileges(connection: _connection), false)
+          "Панель Администратора", PrivilegesWidget(connection: _connection), false)
     ];
     for (var tab in mainWidgets) {
       if (adminList
@@ -108,8 +108,11 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
           heightFactor: 100.0,
           widthFactor: 100.0,
           child: TextButton(
+
             onPressed: () => loginDialog(context,
-                (serv, login, pwd, ctx) => logIn(serv, login, pwd, ctx)),
+                (serv, login, pwd, ctx) => fastLogin(ctx)),
+                  //logIn(serv, login, pwd, ctx)),
+                 //TODO вернуть на нормальные
             child: const Text(
               "ВХОД",
               textScaleFactor: 2.0,
@@ -222,7 +225,10 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
     });
   }
 
-  logIn(String server, String login, String pwd, BuildContext context) async {
+  void fastLogin(BuildContext context){
+    logIn("localhost", "admin", "123", context);
+  }
+  void logIn(String server, String login, String pwd, BuildContext context) async {
     List<dynamic> qPrivileges;
     switch (await dbConnect(server)) {
       case 2:

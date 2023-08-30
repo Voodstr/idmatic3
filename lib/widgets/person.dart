@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
 
-class Person extends StatefulWidget {
-  const Person({super.key, required this.connection});
+class PersonWidget extends StatefulWidget {
+  const PersonWidget({super.key, required this.connection});
 
   final PostgreSQLConnection connection;
 
   @override
-  State<Person> createState() => _PersonState();
+  State<PersonWidget> createState() => _PersonWidgetState();
 }
 
-class _PersonState extends State<Person> {
+class _PersonWidgetState extends State<PersonWidget> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
