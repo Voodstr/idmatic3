@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:idmatic3/widgets/widgets.dart';
+import 'package:postgres/postgres.dart';
 
-class AccessLevel extends PGStatefulWidget {
-  const AccessLevel({super.key, required super.connection});
+class AccessLevel extends StatefulWidget {
+  const AccessLevel({super.key, required this.connection});
 
+  final PostgreSQLConnection connection;
 
   @override
   State<AccessLevel> createState() => _AccessLevelState();

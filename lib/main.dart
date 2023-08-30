@@ -312,7 +312,7 @@ class AvailableWidget {
   AvailableWidget(this.widgetName, this.widget, this.available);
 
   String widgetName;
-  PGStatefulWidget widget;
+  StatefulWidget widget;
 
   bool available = false;
 
