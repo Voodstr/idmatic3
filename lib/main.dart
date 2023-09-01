@@ -74,25 +74,26 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
     AdminPrivilege("Внешние Клиенты", false),
     AdminPrivilege("Учёт рабочего времени", false)
   ];
+
   @override
   Widget build(BuildContext context) {
     List<AvailableWidget> mainWidgets = [
+      AvailableWidget("Персональная карточка",
+          PersonWidget(connection: _connection), false),
       AvailableWidget(
           "Журнал событий", JournalWidget(connection: _connection), false),
-      AvailableWidget(
-          "Персональная карточка", PersonWidget(connection: _connection), false),
       AvailableWidget(
           "Уровни доступа", AccessLevelWidget(connection: _connection), false),
       AvailableWidget(
           "Оборудование", EquipmentWidget(connection: _connection), false),
-      AvailableWidget(
-          "Календарь праздников", HolidaysWidget(connection: _connection), false),
-      AvailableWidget(
-          "Учёт рабочего времени", AccountingWidget(connection: _connection), false),
+      AvailableWidget("Календарь праздников",
+          HolidaysWidget(connection: _connection), false),
+      AvailableWidget("Учёт рабочего времени",
+          AccountingWidget(connection: _connection), false),
       AvailableWidget(
           "Внешние Клиенты", ClientsWidget(connection: _connection), false),
-      AvailableWidget(
-          "Панель Администратора", PrivilegesWidget(connection: _connection), false)
+      AvailableWidget("Панель Администратора",
+          PrivilegesWidget(connection: _connection), false)
     ];
     for (var tab in mainWidgets) {
       if (adminList
@@ -108,11 +109,10 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
           heightFactor: 100.0,
           widthFactor: 100.0,
           child: TextButton(
-
-            onPressed: () => loginDialog(context,
-                (serv, login, pwd, ctx) => fastLogin(ctx)),
-                  //logIn(serv, login, pwd, ctx)),
-                 //TODO вернуть на нормальные
+            onPressed: () =>
+                loginDialog(context, (serv, login, pwd, ctx) => fastLogin(ctx)),
+            //logIn(serv, login, pwd, ctx)),
+            //TODO вернуть на нормальные
             child: const Text(
               "ВХОД",
               textScaleFactor: 2.0,
@@ -220,15 +220,17 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
 
   void _onSuccessfulLogin(String priv, String login) {
     setState(() {
-      adminList = getAdminList(int.parse(priv.substring(1, priv.length - 1)));
+      adminList = getAdminList(int.parse(priv.substring(1, priv.length - 1))); //Строку укорачиваю с обоих концов т.к. возвращает "[значение]"
       currentUser = login;
     });
   }
 
-  void fastLogin(BuildContext context){
+  void fastLogin(BuildContext context) {
     logIn("localhost", "admin", "123", context);
   }
-  void logIn(String server, String login, String pwd, BuildContext context) async {
+
+  void logIn(
+      String server, String login, String pwd, BuildContext context) async {
     List<dynamic> qPrivileges;
     switch (await dbConnect(server)) {
       case 2:
@@ -293,24 +295,18 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
       AdminPrivilege("Внешние Клиенты", false),
       AdminPrivilege("Учёт рабочего времени", false)
     ];
-    List<bool> privilegesToList = [];
-    for (int i = 0; i < (11 - privilegeInt.toRadixString(2).length); i++) {
-      privilegesToList.add(false);
-    }
-    privilegeInt.toRadixString(2).characters.forEach((e) {
-      if (e == "1") {
-        privilegesToList.add(true);
-      } else {
-        privilegesToList.add(false);
-      }
-    });
-    for (var element in adminList.indexed) {
-      adminList[element.$1].available =
-          privilegesToList.reversed.toList()[element.$1];
+    for (var element in (privilegeInt + 2048)
+        .toRadixString(2)
+        .substring(2)
+        .runes
+        .toList()
+        .reversed
+        .map((e) => String.fromCharCode(e))
+        .indexed) {
+      adminList[element.$1].available = (element.$2 == "1");
     }
     return adminList;
   }
-
   String md5Hash(String str) => md5.convert(utf8.encode(str)).toString();
 }
 

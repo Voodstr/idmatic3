@@ -19,21 +19,6 @@ class _AccessLevelWidgetState extends State<AccessLevelWidget> {
       initialIndex: 0,
       length: 5,
       child: Scaffold(
-        persistentFooterButtons: [
-          TextButton(
-            onPressed: () => {onSavePress(context)},
-            child:const Text("Изменить"),
-          ),
-          TextButton(
-            onPressed: () => {onAdd(context)},
-            child: const Text("Добавить"),
-          ),
-          TextButton(
-            onPressed: () => {onDelete(context)},
-            child: const Text("Удалить"),
-          ),
-
-        ],
         appBar: AppBar(
           toolbarHeight: 0.0,
           bottom: const TabBar(
@@ -56,9 +41,8 @@ class _AccessLevelWidgetState extends State<AccessLevelWidget> {
             ],
           ),
         ),
-        body:  TabBarView(
+        body:  const TabBarView(
           children: <Widget>[
-            ListView(children: accessLevels),
             Center(
               child: Text("Уровни доступа"),
             ),
@@ -73,7 +57,7 @@ class _AccessLevelWidgetState extends State<AccessLevelWidget> {
             ),
             Center(
               child: Text("Импорт пропусков"),
-            ),
+            )
 
           ],
         ),
