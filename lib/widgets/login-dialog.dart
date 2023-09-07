@@ -88,16 +88,3 @@ class LoginDialog extends StatelessWidget {
   }
 }
 
-/*
-TextField(
-              controller: serverTextController,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Адрес сервера СКУД"),
-              onEditingComplete: () => {
-                    onComplete(
-                        serverTextController.text,
-                        loginTextController.text,
-                        pwdTextController.text,
-                        context)
-                  }),
- */
