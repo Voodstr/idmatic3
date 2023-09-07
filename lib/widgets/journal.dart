@@ -11,7 +11,7 @@ class JournalWidget extends StatefulWidget {
 class _JournalWidgetState extends State<JournalWidget>{
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    //TODO: implement build
     return const Text("Журнал Событий");
   }
 }
