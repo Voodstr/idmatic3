@@ -5,8 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
 import 'package:idmatic3/widgets/widgets.dart';
 import 'package:crypto/crypto.dart';
+import 'package:window_size/window_size.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    setWindowTitle('IDMatic 3');
+    setWindowMinSize(const Size(1280, 720));
+  }
+
   runApp(const IDMatic());
 }
 

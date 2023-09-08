@@ -21,6 +21,8 @@ version: 1.0.0+1
 environment:
   sdk: '>=3.0.5 <4.0.0'
 
+
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -37,6 +39,11 @@ dependencies:
   cupertino_icons: ^1.0.2
   postgres: ^2.6.2
   crypto: ^3.0.3
+  window_size:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding
+      path: plugins/window_size
+
 
 dev_dependencies:
   flutter_test:
