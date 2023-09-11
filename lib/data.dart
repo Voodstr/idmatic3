@@ -347,17 +347,13 @@ class User {
   String md5Hash(String str) => md5.convert(utf8.encode(str)).toString();
 
 
-List<bool> privilegesToList(int privilegeInt, int size) {
+List<bool> privilegesToList(int privilegeInt,int size){
   List<bool> privilegesToList = [];
   for (int i = 0; i < (size - privilegeInt.toRadixString(2).length); i++) {
     privilegesToList.add(false);
   }
   privilegeInt.toRadixString(2).characters.forEach((e) {
-    if (e == "1") {
-      privilegesToList.add(true);
-    } else {
-      privilegesToList.add(false);
-    }
+    e == "1" ? privilegesToList.add(true) : privilegesToList.add(false);
   });
   return privilegesToList;
 }
