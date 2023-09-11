@@ -22,13 +22,13 @@ class LoginDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text(
+         Container(
+            padding: const EdgeInsets.all(12.0),
+            child: const Text(
               "Вход в систему СКУД",
               textScaleFactor: 1.5,
             )),
-        Padding(
+        Container(
             padding: const EdgeInsets.all(12.0),
             child: DropdownMenu<String>(
               controller: serverTextController,
@@ -39,7 +39,7 @@ class LoginDialog extends StatelessWidget {
                 return DropdownMenuEntry<String>(value: value, label: value);
               }).toList(),
             )),
-        Padding(
+        Container(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
               controller: loginTextController,
@@ -53,7 +53,7 @@ class LoginDialog extends StatelessWidget {
                         context)
                   }),
         ),
-        Padding(
+        Container(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
               obscureText: true,
@@ -88,16 +88,3 @@ class LoginDialog extends StatelessWidget {
   }
 }
 
-/*
-TextField(
-              controller: serverTextController,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Адрес сервера СКУД"),
-              onEditingComplete: () => {
-                    onComplete(
-                        serverTextController.text,
-                        loginTextController.text,
-                        pwdTextController.text,
-                        context)
-                  }),
- */

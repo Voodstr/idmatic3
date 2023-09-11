@@ -10,6 +10,9 @@ class AccessLevelWidget extends StatefulWidget {
   State<AccessLevelWidget> createState() => _AccessLevelWidgetState();
 }
 
+//TODO все списки и данные из БД сформировать в виде FutureWidget
+//TODO Элементы класть в контейнеры, вместо padding
+
 class _AccessLevelWidgetState extends State<AccessLevelWidget> {
   List<Widget>accessLevels =[Text("level1"),Text("data2"),Text("access3")];
   int selectedAccessLevel = 0;
