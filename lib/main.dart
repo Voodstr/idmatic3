@@ -295,7 +295,7 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
       AdminPrivilege("Внешние Клиенты", false),
       AdminPrivilege("Учёт рабочего времени", false)
     ];
-    for (var element in (privilegeInt + 2048)
+    for (var element in (privilegeInt + 2048) //заполнение доступа из инта
         .toRadixString(2)
         .substring(2)
         .runes
