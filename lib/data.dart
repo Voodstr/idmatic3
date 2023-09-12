@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class Account {
@@ -9,11 +11,13 @@ class Account {
   String email;
   bool sendPhoto;
   bool active;
-  int? id;
+  int id;
   String name;
+  bool selected;
 
   Account(
       {this.ip = "",
+      this.id = 0,
       this.port = 0,
       this.username = "",
       this.password = "",
@@ -21,16 +25,18 @@ class Account {
       this.email = "",
       this.sendPhoto = true,
       this.active = true,
-      this.name = ""});
+      this.name = "",
+      this.selected = false});
 }
 
 class AccessLevel {
-  int? id;
+  int id;
   String name;
   String description;
 
   AccessLevel(
       {this.name = "default access level",
+      this.id = 0,
       this.description = "default access level"});
 }
 
@@ -38,42 +44,51 @@ class AccessLevel {
 class Controller {
   String ip;
   String description;
-  int? id;
+  int id;
   int ipInt;
 
   Controller({
     this.ip = "",
+    this.id = 0,
     this.description = "",
     this.ipInt = 0,
   });
 }
 
 class Event {
-  int? id;
+  int id;
   String name;
   int importance;
   int number;
 
-  Event({this.name = "", this.importance = 0, this.number = 0});
+  Event({this.name = "", this.id = 0, this.importance = 0, this.number = 0});
 }
 
 class Group {
-  int? id;
+  int id;
   String description;
   int groupType;
   int blockTime;
 
-  Group({this.description = "", this.groupType = 0, this.blockTime = 0});
+  Group(
+      {this.description = "",
+      this.id = 0,
+      this.groupType = 0,
+      this.blockTime = 0});
 }
 
 class Holidays {
   int year;
   DateTime date;
   int dayOfWeek;
-  int? id;
+  int id;
 
-  Holidays(
-      {this.year = 0, required this.date, this.dayOfWeek = 1, this.id = 0});
+  Holidays({
+    this.year = 0,
+    this.id = 0,
+    required this.date,
+    this.dayOfWeek = 1,
+  });
 }
 
 class Key {
@@ -86,13 +101,14 @@ class Key {
   int passType; // 0- постоянный, 1 - временный, 2 - разовый
   int pincode;
   int accessLevel;
-  int? id;
+  int id;
   int personID;
   int personType; // 0- персонал, 1 - посетитель, 2 - автомобиль, 3 - список персон
 
   Key({
     this.number = 0,
     this.ok = false,
+    this.id = 0,
     required this.started,
     required this.closed,
     required this.update,
@@ -106,7 +122,7 @@ class Key {
 }
 
 class Log {
-  int? id;
+  int id;
   DateTime inputTime;
   DateTime realTime;
   String tpName;
@@ -124,6 +140,7 @@ class Log {
   String groupID;
 
   Log({
+    this.id = 0,
     required this.inputTime,
     required this.realTime,
     this.tpName = "",
@@ -151,11 +168,12 @@ class Pass {
   DateTime update;
   List<String> personFiles;
   DateTime regdate;
-  int? id;
+  int id;
   int uid;
   int schedule;
 
   Pass({
+    this.id = 0,
     this.personType = 0,
     this.name = "",
     this.surname = "",
@@ -170,29 +188,31 @@ class Pass {
 }
 
 class PassParamList {
-  int? id;
+  int id;
   String value;
   int nSel;
 
-  PassParamList({this.value = "", this.nSel = 0});
+  PassParamList({this.id = 0, this.value = "", this.nSel = 0});
 }
 
 class PassParameter {
-  int? id;
+  int id;
   int passId;
   String name;
   String value;
 
-  PassParameter({this.passId = 0, this.name = "", this.value = ""});
+  PassParameter(
+      {this.id = 0, this.passId = 0, this.name = "", this.value = ""});
 }
 
 class PassStructure {
-  int? id;
+  int id;
   int passId;
   int idName;
   int idData;
 
   PassStructure({
+    this.id = 0,
     this.passId = 0,
     this.idName = 0,
     this.idData = 0,
@@ -206,12 +226,13 @@ class Reader {
   int state;
   int groupID;
   int mode;
-  int? id;
+  int id;
   int controller;
   int numberOnController;
   int tpFunction;
 
   Reader({
+    this.id = 0,
     this.name = "",
     this.description = "",
     this.tpType = 0,
@@ -230,45 +251,48 @@ class ReadersList {
   int route = 0;
 
   ReadersList({
+    this.id = 0,
     this.reader = 0,
     this.route = 0,
   });
 }
 
 class Result {
-  int? id;
+  int id;
   int number;
   String result;
 
-  Result({this.number = 0, this.result = ""});
+  Result({this.id = 0, this.number = 0, this.result = ""});
 }
 
 class Destination {
   // Route
-  int? id;
+  int id;
   String name;
   String description;
   int timeZone;
 
   Destination(
-      {this.name = "default route",
+      {this.id = 0,
+      this.name = "default route",
       this.description = "default route",
       this.timeZone = 1});
 }
 
 class DestinationList {
-  int? id;
+  int id;
   int accessLevel;
   int route;
 
   DestinationList({
+    this.id = 0,
     this.accessLevel = 0,
     this.route = 0,
   });
 }
 
 class Schedule {
-  int? id;
+  int id;
   String name;
   TimeOfDay beginTime;
   TimeOfDay endTime;
@@ -276,26 +300,28 @@ class Schedule {
 
   Schedule(
       {this.name = "",
+      this.id = 0,
       required this.beginTime,
       required this.endTime,
       this.week = 0});
 }
 
 class StructureData {
-  int? id;
+  int id;
   int structureID;
   String name;
   int nSel;
 
-  StructureData({this.structureID = 0, this.name = "", this.nSel = 0});
+  StructureData(
+      {this.id = 0, this.structureID = 0, this.name = "", this.nSel = 0});
 }
 
 class StructureList {
-  int? id;
+  int id;
   String value;
   int nSel;
 
-  StructureList({this.value = "", this.nSel = 0});
+  StructureList({this.id = 0, this.value = "", this.nSel = 0});
 }
 
 class TimeZone {
@@ -303,10 +329,11 @@ class TimeZone {
   TimeOfDay beginTime = const TimeOfDay(hour: 0, minute: 0);
   TimeOfDay endTime = const TimeOfDay(hour: 0, minute: 0);
   int week;
-  int? id;
+  int id;
   int number;
 
   TimeZone({
+    this.id = 0,
     this.name = "",
     required this.beginTime,
     required this.endTime,
@@ -320,7 +347,7 @@ class User {
   String name;
   String password;
   bool allowance;
-  int? id;
+  int id;
 
   User(
       {this.privilege = 2047,
@@ -366,7 +393,7 @@ class Result {
   TimeOfDay beginTime;
   Image photo;
   List<String> pfiles;
-  int? id;
+  int id;
   bool ok;
 
   Result(

@@ -68,6 +68,8 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
   @override
   Widget build(BuildContext context) {
     List<AvailableWidget> mainWidgets = [
+      AvailableWidget(
+          "Внешние Клиенты", ClientsWidget(connection: _connection), false),
       AvailableWidget("Персональная карточка",
           PersonWidget(connection: _connection), false),
       AvailableWidget(
@@ -80,8 +82,6 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
           HolidaysWidget(connection: _connection), false),
       AvailableWidget("Учёт рабочего времени",
           AccountingWidget(connection: _connection), false),
-      AvailableWidget(
-          "Внешние Клиенты", ClientsWidget(connection: _connection), false),
       AvailableWidget("Панель Администратора",
           PrivilegesWidget(connection: _connection), false)
     ];

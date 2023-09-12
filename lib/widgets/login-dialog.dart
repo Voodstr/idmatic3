@@ -9,8 +9,6 @@ class LoginDialog extends StatelessWidget {
 
       this.listOfServers = const ["localhost"]});
 
-  //TODO поменять диалог на полноэкранный если размер экрана телефон/планшет
-  //TODO можно сделать виджет в виде <Form>
   final TextEditingController serverTextController = TextEditingController();
   final TextEditingController pwdTextController = TextEditingController();
   final TextEditingController loginTextController = TextEditingController();
