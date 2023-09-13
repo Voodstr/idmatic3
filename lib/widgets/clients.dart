@@ -28,202 +28,6 @@ class _ClientsWidgetState extends State<ClientsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var myColumns = [
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'IP адрес',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'Порт',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'Пользователь',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'Пароль',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'Время',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'Почта',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-      const DataColumn(
-        label: Expanded(
-            child: Text(
-          'Фото',
-          textAlign: TextAlign.center,
-        )),
-      ),
-      const DataColumn(
-        label: Expanded(
-            child: Text(
-          'Активно',
-          textAlign: TextAlign.center,
-        )),
-      ),
-      DataColumn(
-          label: const Expanded(
-              child: Text(
-            'Описание',
-            textAlign: TextAlign.center,
-          )),
-          onSort: (ind, dir) {
-            _sort(ind, dir);
-          }),
-    ];
-    var myRows = _clients.map((client) {
-      var ipController = TextEditingController(text: client.ip);
-      var portController = TextEditingController(text: client.port.toString());
-      var userController = TextEditingController(text: client.username);
-      var pwdController = TextEditingController(text: client.password);
-      var timeoutController =
-          TextEditingController(text: client.connectionTimeout.toString());
-      var emailController = TextEditingController(text: client.email);
-      var nameController = TextEditingController(text: client.name);
-      return DataRow(
-          cells: [
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(15),
-                FilteringTextInputFormatter.deny(RegExp('[a-zA-Z]')),
-              ],
-              controller: ipController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .ip = text
-              },
-            )),
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(4),
-                FilteringTextInputFormatter.digitsOnly
-              ],
-              controller: portController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .port = int.parse(text)
-              },
-            )),
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(20),
-              ],
-              controller: userController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .username = text
-              },
-            )),
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(15),
-              ],
-              controller: pwdController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .password = text
-              },
-            )),
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(4),
-                FilteringTextInputFormatter.digitsOnly
-              ],
-              controller: timeoutController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .connectionTimeout = int.parse(text)
-              },
-            )),
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(20),
-              ],
-              controller: emailController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .email = text
-              },
-            )),
-            DataCell(Checkbox(
-              value: client.sendPhoto,
-              onChanged: (bool? value) {
-                checkSendPhoto(client.id, value!);
-              },
-            )),
-            DataCell(Checkbox(
-              value: client.active,
-              onChanged: (bool? value) {
-                checkActive(client.id, value!);
-              },
-            )),
-            DataCell(TextField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(20),
-              ],
-              controller: nameController,
-              onChanged: (text) => {
-                _clients
-                    .elementAt(_clients
-                        .indexWhere((element) => element.id == client.id))
-                    .name = text
-              },
-            )),
-          ],
-          selected: _clients
-              .elementAt(
-                  _clients.indexWhere((element) => element.id == client.id))
-              .selected,
-          onSelectChanged: (sel) => selectClient(client.id, sel!));
-    }).toList();
     if (_isLoading) {
       return const CircularProgressIndicator();
     } else {
@@ -261,61 +65,225 @@ class _ClientsWidgetState extends State<ClientsWidget> {
         ),
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Center(
-            child: DataTable(
-              columnSpacing: 10,
-              columns: myColumns,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black45,
-                  width: 10,
-                ),
-                borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-              ),
-              rows: myRows,
-              sortColumnIndex: _sortIndex,
-              showBottomBorder: true,
-              sortAscending: _asc,
+          child: Container(alignment: Alignment.center,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return DataTable(
+                  columnSpacing: 10,
+                  columns: [
+                    DataColumn(
+                        label: const Text(
+                              'IP адрес',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                    DataColumn(
+                        label:  const Text(
+                              'Порт',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                    DataColumn(
+                        label: const Text(
+                              'Пользователь',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                    DataColumn(
+                        label:  const Text(
+                              'Пароль',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                    DataColumn(
+                        label:  const Text(
+                              'Время',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                    DataColumn(
+                        label:  const Text(
+                              'Почта',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                    DataColumn(
+                      label: const Text(
+                            'Фото',
+                            textAlign: TextAlign.center,
+                          ),
+                    ),
+                    DataColumn(
+                      label:  const Text(
+                            'Активно',
+                            textAlign: TextAlign.center,
+                          ),
+                    ),
+                    DataColumn(
+                        label:  const Text(
+                              'Описание',
+                              textAlign: TextAlign.center,
+                            ),
+                        onSort: (ind, dir) {
+                          _sort(ind, dir);
+                        }),
+                  ],
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black45,
+                      width: 3,
+                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  rows: _clients.map((client) {
+                    var ipController = TextEditingController(text: client.ip);
+                    var portController =
+                        TextEditingController(text: client.port.toString());
+                    var userController =
+                        TextEditingController(text: client.username);
+                    var pwdController =
+                        TextEditingController(text: client.password);
+                    var timeoutController = TextEditingController(
+                        text: client.connectionTimeout.toString());
+                    var emailController =
+                        TextEditingController(text: client.email);
+                    var nameController =
+                        TextEditingController(text: client.name);
+                    return DataRow(
+                        cells: [
+                          DataCell(ConstrainedBox(
+                            constraints:
+                                const BoxConstraints(maxWidth: 150, minWidth: 120),
+                            child: TextField(
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(15),
+                                FilteringTextInputFormatter.deny(
+                                    RegExp('[a-zA-Z]')),
+                              ],
+                              controller: ipController,
+                              onChanged: (text) => {
+                                _clients
+                                    .elementAt(_clients.indexWhere(
+                                        (element) => element.id == client.id))
+                                    .ip = text
+                              },
+                            ),
+                          )),
+                          DataCell(TextField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(4),
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            controller: portController,
+                            onChanged: (text) => {
+                              _clients
+                                  .elementAt(_clients.indexWhere(
+                                      (element) => element.id == client.id))
+                                  .port = int.parse(text)
+                            },
+                          )),
+                          DataCell(TextField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(20),
+                            ],
+                            controller: userController,
+                            onChanged: (text) => {
+                              _clients
+                                  .elementAt(_clients.indexWhere(
+                                      (element) => element.id == client.id))
+                                  .username = text
+                            },
+                          )),
+                          DataCell(TextField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(15),
+                            ],
+                            controller: pwdController,
+                            onChanged: (text) => {
+                              _clients
+                                  .elementAt(_clients.indexWhere(
+                                      (element) => element.id == client.id))
+                                  .password = text
+                            },
+                          )),
+                          DataCell(TextField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(4),
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            controller: timeoutController,
+                            onChanged: (text) => {
+                              _clients
+                                  .elementAt(_clients.indexWhere(
+                                      (element) => element.id == client.id))
+                                  .connectionTimeout = int.parse(text)
+                            },
+                          )),
+                          DataCell(TextField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(20),
+                            ],
+                            controller: emailController,
+                            onChanged: (text) => {
+                              _clients
+                                  .elementAt(_clients.indexWhere(
+                                      (element) => element.id == client.id))
+                                  .email = text
+                            },
+                          )),
+                          DataCell(Checkbox(
+                            value: client.sendPhoto,
+                            onChanged: (bool? value) {
+                              checkSendPhoto(client.id, value!);
+                            },
+                          )),
+                          DataCell(Checkbox(
+                            value: client.active,
+                            onChanged: (bool? value) {
+                              checkActive(client.id, value!);
+                            },
+                          )),
+                          DataCell(TextField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(20),
+                            ],
+                            controller: nameController,
+                            onChanged: (text) => {
+                              _clients
+                                  .elementAt(_clients.indexWhere(
+                                      (element) => element.id == client.id))
+                                  .name = text
+                            },
+                          )),
+                        ],
+                        selected: _clients
+                            .elementAt(_clients.indexWhere(
+                                (element) => element.id == client.id))
+                            .selected,
+                        onSelectChanged: (sel) =>
+                            selectClient(client.id, sel!));
+                  }).toList(),
+                  sortColumnIndex: _sortIndex,
+                  showBottomBorder: true,
+                  sortAscending: _asc,
+                );
+              },
             ),
           ),
         ),
       );
-      /*
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            TextButton(
-                onPressed: () => addClient(context),
-                style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll(Colors.grey.shade200)),
-                child: const Text(
-                  "Добавить",
-                  textScaleFactor: 2.0,
-                )),
-            TextButton(
-                onPressed: () => removeClients(context),
-                style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll(Colors.red.shade200)),
-                child: const Text(
-                  "Удалить",
-                  textScaleFactor: 2.0,
-                )),
-            TextButton(
-                onPressed: () => saveClients(context),
-                style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll(Colors.green.shade200)),
-                child: const Text(
-                  "Сохранить",
-                  textScaleFactor: 2.0,
-                ))
-          ],
-        )
-      ]);
-
-       */
     }
   }
 
