@@ -17,18 +17,9 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
-    GList *list = gtk_application_get_windows(GTK_APPLICATION(application));
-    GtkWindow* existing_window = list ? GTK_WINDOW(list->data) : NULL;
+  GtkWindow* window =
+      GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
-    if (existing_window) {
-        gtk_window_present(existing_window);
-    } else {
-        // Put your existing code here
-        // this is will normally start like this
-        GtkWindow* window =  GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
-        // and end like this
-        gtk_widget_grab_focus(GTK_WIDGET(view));
-    }
   // Use a header bar when running in GNOME as this is the common style used
   // by applications and is the setup most users will be using (e.g. Ubuntu
   // desktop).
