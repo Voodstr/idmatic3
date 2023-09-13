@@ -82,8 +82,6 @@ app.*.map.json
 /windows/runner/main.cpp
 /macos/Runner/MainFlutterWindow.swift
 /macos/Runner/Base.lproj/MainMenu.xib
-/linux/my_application.cc
-/linux/my_application.h
 /macos/Runner.xcodeproj/project.pbxproj
 /macos/Runner/Release.entitlements
 /macos/Runner/Configs/Release.xcconfig
@@ -96,12 +94,6 @@ app.*.map.json
 /windows/runner/utils.h
 /macos/Runner/Configs/Warnings.xcconfig
 /test/widget_test.dart
-/windows/runner/win32_window.cpp
-/windows/runner/win32_window.h
 
-/web
-/windows
-/linux
-/macos
 
 /pubspec.lock

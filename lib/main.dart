@@ -185,7 +185,7 @@ class _IDMaticMainPageState extends State<IDMaticMainPage> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return LoginDialog(
+          return LoginDialogWidget(
             onComplete: onComplete,
             listOfServers: const ["localhost", "130.1.2.102"],
           ); //TODO получение списка серверов

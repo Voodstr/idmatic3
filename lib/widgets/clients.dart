@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:postgres/postgres.dart';
 import 'package:idmatic3/data.dart' as pgdata;
 
@@ -16,7 +17,7 @@ class _ClientsWidgetState extends State<ClientsWidget> {
   var _asc = false;
   var acc = pgdata.Account();
   var _isLoading = true;
-  List<pgdata.Account> _oldClients = [];
+  final List<pgdata.Account> _oldClients = [];
   List<pgdata.Account> _clients = [];
 
   @override
@@ -29,51 +30,169 @@ class _ClientsWidgetState extends State<ClientsWidget> {
   Widget build(BuildContext context) {
     var myColumns = [
       DataColumn(
-          label: const Text('IP адрес'),
+          label: const Expanded(
+              child: Text(
+            'IP адрес',
+            textAlign: TextAlign.center,
+          )),
           onSort: (ind, dir) {
             _sort(ind, dir);
           }),
       DataColumn(
-          label: const Text('Пользователь'),
+          label: const Expanded(
+              child: Text(
+            'Порт',
+            textAlign: TextAlign.center,
+          )),
           onSort: (ind, dir) {
             _sort(ind, dir);
           }),
       DataColumn(
-          label: const Text('Пароль'),
+          label: const Expanded(
+              child: Text(
+            'Пользователь',
+            textAlign: TextAlign.center,
+          )),
           onSort: (ind, dir) {
             _sort(ind, dir);
           }),
       DataColumn(
-          label: const Text('Время переподключения'),
+          label: const Expanded(
+              child: Text(
+            'Пароль',
+            textAlign: TextAlign.center,
+          )),
+          onSort: (ind, dir) {
+            _sort(ind, dir);
+          }),
+      DataColumn(
+          label: const Expanded(
+              child: Text(
+            'Время',
+            textAlign: TextAlign.center,
+          )),
+          onSort: (ind, dir) {
+            _sort(ind, dir);
+          }),
+      DataColumn(
+          label: const Expanded(
+              child: Text(
+            'Почта',
+            textAlign: TextAlign.center,
+          )),
           onSort: (ind, dir) {
             _sort(ind, dir);
           }),
       const DataColumn(
-        label: Text('Отправка фото'),
+        label: Expanded(
+            child: Text(
+          'Фото',
+          textAlign: TextAlign.center,
+        )),
       ),
       const DataColumn(
-        label: Text('Активно'),
+        label: Expanded(
+            child: Text(
+          'Активно',
+          textAlign: TextAlign.center,
+        )),
       ),
       DataColumn(
-          label: const Text('Описание'),
+          label: const Expanded(
+              child: Text(
+            'Описание',
+            textAlign: TextAlign.center,
+          )),
           onSort: (ind, dir) {
             _sort(ind, dir);
           }),
     ];
     var myRows = _clients.map((client) {
-      var pwdController = TextEditingController();
-      pwdController.text = client.password;
-      var nameController = TextEditingController();
-      nameController.text = client.name;
+      var ipController = TextEditingController(text: client.ip);
+      var portController = TextEditingController(text: client.port.toString());
+      var userController = TextEditingController(text: client.username);
+      var pwdController = TextEditingController(text: client.password);
+      var timeoutController =
+          TextEditingController(text: client.connectionTimeout.toString());
+      var emailController = TextEditingController(text: client.email);
+      var nameController = TextEditingController(text: client.name);
       return DataRow(
           cells: [
-            DataCell(Text("${client.ip}:${client.port}"),
-                onTap: () => print(client.id)),
-            DataCell(
-              Text(client.username),
-            ),
-            DataCell(TextField(controller: pwdController)),
-            DataCell(Text(client.connectionTimeout.toString())),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(15),
+                FilteringTextInputFormatter.deny(RegExp('[a-zA-Z]')),
+              ],
+              controller: ipController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .ip = text
+              },
+            )),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(4),
+                FilteringTextInputFormatter.digitsOnly
+              ],
+              controller: portController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .port = int.parse(text)
+              },
+            )),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(20),
+              ],
+              controller: userController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .username = text
+              },
+            )),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(15),
+              ],
+              controller: pwdController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .password = text
+              },
+            )),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(4),
+                FilteringTextInputFormatter.digitsOnly
+              ],
+              controller: timeoutController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .connectionTimeout = int.parse(text)
+              },
+            )),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(20),
+              ],
+              controller: emailController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .email = text
+              },
+            )),
             DataCell(Checkbox(
               value: client.sendPhoto,
               onChanged: (bool? value) {
@@ -86,7 +205,18 @@ class _ClientsWidgetState extends State<ClientsWidget> {
                 checkActive(client.id, value!);
               },
             )),
-            DataCell(TextField(controller: nameController)),
+            DataCell(TextField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(20),
+              ],
+              controller: nameController,
+              onChanged: (text) => {
+                _clients
+                    .elementAt(_clients
+                        .indexWhere((element) => element.id == client.id))
+                    .name = text
+              },
+            )),
           ],
           selected: _clients
               .elementAt(
@@ -97,30 +227,60 @@ class _ClientsWidgetState extends State<ClientsWidget> {
     if (_isLoading) {
       return const CircularProgressIndicator();
     } else {
-      return Column(children: [
-        Text(
-          "Внешние клиенты",
-          textAlign: TextAlign.center,
-          textScaleFactor: 3,
+      return Scaffold(
+        persistentFooterAlignment: AlignmentDirectional.topCenter,
+        persistentFooterButtons: [
+          TextButton(
+              onPressed: () => addClient(context),
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStatePropertyAll(Colors.grey.shade200)),
+              child: const Text(
+                "Добавить",
+              )),
+          TextButton(
+              onPressed: () => removeClients(context),
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStatePropertyAll(Colors.red.shade200)),
+              child: const Text(
+                "Удалить",
+              )),
+          TextButton(
+              onPressed: () => saveClients(context),
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStatePropertyAll(Colors.green.shade200)),
+              child: const Text(
+                "Сохранить",
+              ))
+        ],
+        appBar: AppBar(
+          title: const Text("Внешние клиенты"),
+          centerTitle: true,
         ),
-        Container(
-          alignment: Alignment.topCenter,
-          padding: EdgeInsets.all(5.0),
-          child: DataTable(
-            columns: myColumns,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black45,
-                width: 10,
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Center(
+            child: DataTable(
+              columnSpacing: 10,
+              columns: myColumns,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black45,
+                  width: 10,
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(10.0)),
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+              rows: myRows,
+              sortColumnIndex: _sortIndex,
+              showBottomBorder: true,
+              sortAscending: _asc,
             ),
-            rows: myRows,
-            sortColumnIndex: _sortIndex,
-            showBottomBorder: true,
-            sortAscending: _asc,
           ),
         ),
+      );
+      /*
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -154,12 +314,13 @@ class _ClientsWidgetState extends State<ClientsWidget> {
           ],
         )
       ]);
+
+       */
     }
   }
 
   void getData() async {
     setState(() => _isLoading = true);
-    print("getData");
     List<List<dynamic>> results =
         await widget.connection.query("SELECT * FROM taccount");
     _oldClients.clear();
@@ -220,7 +381,6 @@ class _ClientsWidgetState extends State<ClientsWidget> {
   }
 
   void checkSendPhoto(int id, bool check) {
-    print("checkSendPhoto $id");
     setState(() {
       _clients
           .elementAt(_clients.indexWhere((element) => element.id == id))
@@ -229,7 +389,6 @@ class _ClientsWidgetState extends State<ClientsWidget> {
   }
 
   void checkActive(int id, bool check) {
-    print("checkActive $id");
     setState(() {
       _clients
           .elementAt(_clients.indexWhere((element) => element.id == id))
@@ -238,7 +397,6 @@ class _ClientsWidgetState extends State<ClientsWidget> {
   }
 
   void selectClient(int id, bool sel) {
-    print("selectClient $id");
     setState(() {
       _clients
           .elementAt(_clients.indexWhere((element) => element.id == id))
@@ -277,32 +435,26 @@ class _ClientsWidgetState extends State<ClientsWidget> {
     return result;
   }
 
-  void addClient(BuildContext context) {
-    print("AddClient");
-  }
-
   Future<void> removeClients(BuildContext context) async {
-    await approveDialog(context)
-        ? {
-            print("removeClients execute"),
-            _clients
-                .where((element) => element.selected)
-                .forEach((element) async {
-              await widget.connection.query(
-                  "DELETE FROM taccount where id = @id",
-                  substitutionValues: {"id": element.id});
-            })
-          }
-        : {
-            print("removeClients cancel"),
-          };
-    getData();
+    if (_clients.where((element) => element.selected).isNotEmpty) {
+      await approveDialog(context)
+          ? {
+              _clients
+                  .where((element) => element.selected)
+                  .forEach((element) async {
+                await widget.connection.query(
+                    "DELETE FROM taccount where id = @id",
+                    substitutionValues: {"id": element.id});
+              })
+            }
+          : {};
+      getData();
+    }
   }
 
   Future<void> saveClients(BuildContext context) async {
     await approveDialog(context)
         ? {
-            print("saveClients approve"),
             for (var element in _clients)
               {
                 await widget.connection.query(
@@ -331,9 +483,13 @@ class _ClientsWidgetState extends State<ClientsWidget> {
                     })
               }
           }
-        : {
-            print("saveClients cancel"),
-          };
+        : {};
+    getData();
+  }
+
+  Future<void> addClient(BuildContext context) async {
+    await widget.connection.query(
+        "INSERT INTO taccount (ip,email_address,username,password,name) VALUES ('127.0.0.1','email@email','','','')");
     getData();
   }
 }

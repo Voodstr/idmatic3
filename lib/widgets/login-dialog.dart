@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class LoginDialog extends StatelessWidget {
+class LoginDialogWidget extends StatelessWidget {
   final List<String> listOfServers;
 
-  LoginDialog(
+  LoginDialogWidget(
       {super.key,
       required this.onComplete,
 

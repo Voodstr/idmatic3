@@ -17,15 +17,15 @@ class StatusTittle extends StatelessWidget {
           const Spacer(),
           Text(currentUser),
           const Spacer(),
+          Text(
+            dbState,
+            textScaleFactor: 0.6,
+            maxLines: 4,
+          ),
           const Icon(
             Icons.done_outline_outlined,
             color: Colors.green,
           ),
-          Text(
-            dbState,
-            textScaleFactor: 0.5,
-            maxLines: 4,
-          )
         ],
       );
     } else {
