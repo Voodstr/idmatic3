@@ -79,6 +79,8 @@ app.*.map.json
 /macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 /macos/Runner/Info.plist
 /linux/main.cc
+/linux/my_application.cc
+/linux/my_application.h
 /windows/runner/main.cpp
 /macos/Runner/MainFlutterWindow.swift
 /macos/Runner/Base.lproj/MainMenu.xib
@@ -95,5 +97,8 @@ app.*.map.json
 /macos/Runner/Configs/Warnings.xcconfig
 /test/widget_test.dart
 
+/linux
+/macos
+/web
 
 /pubspec.lock
