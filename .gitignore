@@ -95,5 +95,8 @@ app.*.map.json
 /macos/Runner/Configs/Warnings.xcconfig
 /test/widget_test.dart
 
+/web
+/windows
+/macos
 
 /pubspec.lock
